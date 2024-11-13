@@ -139,9 +139,21 @@ export class InvSalesComponent implements OnInit {
   }
 
   onChangeRateQuantity(index: number) {
+    const productId = this.salesDetailFormArray.controls[index].get('productId')?.value;
     const qty = this.salesDetailFormArray.controls[index].get('quantity')?.value;
     const rate = this.salesDetailFormArray.controls[index].get('unitPrice')?.value
-    this.salesDetailFormArray.controls[index].get('amount')?.patchValue(qty * rate);
+    const selectedProduct = this.products.find(product => product.id === productId);
+    if(selectedProduct.stockLevel >= qty){
+      this.salesDetailFormArray.controls[index].get('amount')?.patchValue(qty * rate);
+    }
+    else{
+      this.snackBar.open('Stock Quanntitt Exceed', 'Close', {
+        duration: 3000,
+        panelClass: ['error-snackbar']
+      });
+       this.salesDetailFormArray.controls[index].get('quantity')?.patchValue(1);
+       this.salesDetailFormArray.controls[index].get('amount')?.patchValue(qty * rate);
+    }
     this.calculatenetPayable();
   }
 
