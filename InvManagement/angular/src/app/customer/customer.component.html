@@ -1,0 +1,95 @@
+<div class="customer-list-container">
+    <div class="create-customer-btn-container">
+        <button class="btn btn-success" (click)="createCustomer()">Create Customer</button>
+    </div>
+    <!-- Table displaying the customer data -->
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Action</th>
+                <th>Name</th>
+                <th>Gender</th>
+                <th>Email</th>
+                <th>Contact</th>
+                <th>Address</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Loop through each customer item and display it -->
+            <tr *ngFor="let customer of customer.items">
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                          Action
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                          <li><a class="dropdown-item"  (click)="editCustomer(customer.id)">Edit</a></li>
+                          <li><a class="dropdown-item"  (click)="deleteCustomer(customer.id)">Delete</a></li>
+                        </ul>
+                      </div>
+                </td>
+                <td>{{ customer.name }}</td>
+                <td>{{ customer.gender }}</td>
+                <td>{{ customer.email }}</td>
+                <td>{{ customer.contact }}</td>
+                <td>{{ customer.address }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Pagination controls -->
+    <div *ngIf="customer.totalCount > 0" class="pagination-controls">
+        <button (click)="list.pageChange(1)" [disabled]="list.isFirstPage()" class="btn btn-primary">First</button>
+
+        <button (click)="list.pageChange(list.currentPage - 1)" [disabled]="list.isFirstPage()"
+            class="btn btn-primary">Previous</button>
+
+        <button (click)="list.pageChange(list.currentPage + 1)" [disabled]="list.isLastPage()"
+            class="btn btn-primary">Next</button>
+
+        <button (click)="list.pageChange(list.totalPages)" [disabled]="list.isLastPage()"
+            class="btn btn-primary">Last</button>
+    </div>
+</div>
+
+<!-- abp modal -->
+<abp-modal [(visible)]="isModalOpen">
+    <ng-template #abpHeader>
+        <h3>{{ selectedCustomer.id ? '::EditCustomer' : '::NewCustomer' | abpLocalization}}</h3>
+    </ng-template>
+    <ng-template #abpBody>
+        <div class="form-group">
+            <label for="name">Customer Name</label><span> * </span>
+            <input type="text" id="name" class="form-control" formControlName="name">
+        </div>
+
+        <div class="form-group">
+            <label for="gender">Gender</label><span> * </span>
+            <select class="form-control" id="gender-type" formControlName="gender">
+                <option [ngValue]="null">select gender</option>
+                <option [ngValue]="type.value" *ngFor="let type of genderType"></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" class="form-control" formControlName="email">
+        </div>
+
+        <div class="form-group">
+            <label for="contact">contact</label><span> * </span>
+            <input type="text" id="contact" class="form-control" formControlName="contact">
+        </div>
+        <div class="form-group">
+            <label for="contact">Address</label>
+            <input type="text" id="address" class="form-control" formControlName="address">
+        </div>
+
+    </ng-template>
+    <ng-template #abpFooter>
+        <button type="button" class="btn btn-secondary" #abpClose> {{'::Close' | abpLocalization}}</button>
+        <button class="btn btn-primary" (click)="save()" [disabled]="form.invalid">
+            <i class="fa fa-check mr-1"></i>
+            {{'::Save' | abpLocalization}}
+        </button>
+    </ng-template>
+</abp-modal>

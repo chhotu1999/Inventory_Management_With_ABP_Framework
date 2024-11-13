@@ -1,0 +1,83 @@
+<div class="stock-summary-list-container">
+
+
+    <div class="create-stock-summary-btn-container">
+        <button class="btn btn-success" (click)="createStockSummary()">Add Stock</button>
+    </div>
+
+    <!-- Table displaying the stock summary data -->
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Unit</th>
+                <th>Stock Quantity</th>
+                <th>Balance Quantity</th>
+                <th>Created Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Loop through each stock summary item and display it -->
+            <tr *ngFor="let stockSummary of stockSummary.items">
+
+                <td>{{ stockSummary.productName }}</td>
+                <td>{{ stockSummary.unit }}</td>
+                <td>{{ stockSummary.stockQuantity }}</td>
+                <td>{{ stockSummary.balanceQuantity }}</td>
+                <td>{{ stockSummary.lastModificationTime }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Pagination controls -->
+    <div *ngIf="stockSummary.totalCount > 0" class="pagination-controls">
+        <button (click)="list.pageChange(1)" [disabled]="list.isFirstPage()" class="btn btn-primary">First</button>
+
+        <button (click)="list.pageChange(list.currentPage - 1)" [disabled]="list.isFirstPage()"
+            class="btn btn-primary">Previous</button>
+
+        <button (click)="list.pageChange(list.currentPage + 1)" [disabled]="list.isLastPage()"
+            class="btn btn-primary">Next</button>
+
+        <button (click)="list.pageChange(list.totalPages)" [disabled]="list.isLastPage()"
+            class="btn btn-primary">Last</button>
+    </div>
+</div>
+
+<!-- abp modal for Add/Edit Stock Summary -->
+<abp-modal [(visible)]="isModalOpen">
+    <ng-template #abpHeader>
+        <h3>{{ '::Add Stock' | abpLocalization }}</h3>
+    </ng-template>
+    <ng-template #abpBody>
+        <!-- Product Selection -->
+        <div class="form-group">
+            <label for="productId">Product</label><span> * </span>
+            <select class="form-control" id="productId" (change)="onProductChange($event.target.value)"
+                formControlName="productId">
+                <option [ngValue]="null">Select Product</option>
+                <option [ngValue]="product.id" *ngFor="let product of products">{{ product.name }}</option>
+            </select>
+        </div>
+
+        <!-- Unit Selection -->
+        <div class="form-group">
+            <label for="unit">Unit</label>
+            <input type="text" id="unit" class="form-control" formControlName="unit">
+        </div>
+
+        <!-- Stock Quantity -->
+        <div class="form-group">
+            <label for="stockQuantity">Stock Quantity</label><span> * </span>
+            <input type="number" id="stockQuantity" class="form-control" formControlName="stockQuantity">
+        </div>
+
+    </ng-template>
+    <ng-template #abpFooter>
+        <button type="button" class="btn btn-secondary" #abpClose>{{'::Close' | abpLocalization}}</button>
+        <button class="btn btn-primary" (click)="saveStockSummary()" [disabled]="form.invalid">
+            <i class="fa fa-check mr-1"></i>
+            {{'::Save' | abpLocalization}}
+        </button>
+    </ng-template>
+</abp-modal>

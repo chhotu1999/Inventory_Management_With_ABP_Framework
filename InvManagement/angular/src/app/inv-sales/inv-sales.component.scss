@@ -1,0 +1,18 @@
+/* Custom Modal Dimensions */
+.sales-modal {
+    width: 80%; /* Adjust the width of the modal */
+    height: 70%; /* Adjust the height of the modal */
+    max-width: 1200px; /* Maximum width */
+    max-height: 800px; /* Maximum height */
+    margin: auto;
+}
+
+/* Position the 'Add Item' button above the table and on the right */
+.add-item-button-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 10; /* Make sure the button is on top of the table */
+    margin-top: 10px; /* Space from the top of the modal */
+    margin-right: 10px; /* Space from the right side of the modal */
+}

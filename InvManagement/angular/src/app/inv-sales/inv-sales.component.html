@@ -1,0 +1,199 @@
+<div class="stock-summary-list-container">
+
+
+    <div class="create-stock-summary-btn-container">
+        <button class="btn btn-success" (click)="createSales()">Add Stock</button>
+    </div>
+
+    <!-- Table displaying the stock summary data -->
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Invoice Date</th>
+                <th>Customer Name</th>
+                <th>Net Amount</th>
+                <th>Discount</th>
+                <th>TotalAmount</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Loop through each stock summary item and display it -->
+            <tr *ngFor="let sales of invSales.items">
+
+                <td>{{ sales.lastModificationTime }}</td>
+                <td>{{ sales.customerName }}</td>
+                <td>{{ sales.netAmount }}</td>
+                <td>{{ sales.discount }}</td>
+                <td>{{ sales.totalAmount }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Pagination controls -->
+    <div *ngIf="invSales.totalCount > 0" class="pagination-controls">
+        <button (click)="list.pageChange(1)" [disabled]="list.isFirstPage()" class="btn btn-primary">First</button>
+
+        <button (click)="list.pageChange(list.currentPage - 1)" [disabled]="list.isFirstPage()"
+            class="btn btn-primary">Previous</button>
+
+        <button (click)="list.pageChange(list.currentPage + 1)" [disabled]="list.isLastPage()"
+            class="btn btn-primary">Next</button>
+
+        <button (click)="list.pageChange(list.totalPages)" [disabled]="list.isLastPage()"
+            class="btn btn-primary">Last</button>
+    </div>
+</div>
+
+<!-- abp modal for Add/Edit Stock Summary -->
+<abp-modal [(visible)]="isModalOpen" class="sales-modal">
+    <ng-template #abpHeader>
+        <h3>{{ '::Create Sales' | abpLocalization }}</h3>
+    </ng-template>
+    <ng-template #abpBody>
+        <form [formGroup]="formGroup" class="formKeyId">
+            <div class="d-flex">
+                <mat-form-field appearance="outline" class="w-100">
+                    <mat-label for="customerId">Customer</mat-label>
+                    <mat-select formControlName="customerId" id="customerId">
+                        <mat-option *ngFor="let customer of customers" [value]="customer.id">
+                            {{ customer.name }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="formGroup.get('customerId').hasError('required')">
+                        Customer is required
+                    </mat-error>
+                </mat-form-field>
+                <span> * </span>
+            </div>
+            <div class="d-flex position-relative">
+                <div class="sales-detail-container sales-table-container">
+                    <ng-container formArrayName="details">
+                        <table mat-table class="table-element mat-table table-scroll"
+                            [dataSource]="salesDetailDataSource?.data?.length ? salesDetailDataSource : emptyData">
+                            <!-- peoduct -->
+                            <ng-container matColumnDef="product">
+                                <th mat-header-cell *matHeaderCellDef>Product</th>
+                                <td mat-cell *matCellDef="let element; let i = index" [formGroup]="element"> <mat-select
+                                        formControlName="productId" (selectionChange)="onProductChange($event.value, i)" [(value)]="element.productId">
+                                        <mat-option *ngFor="let product of products" [value]="product.id">
+                                            {{ product.name }}
+                                        </mat-option>
+                                    </mat-select></td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="unit">
+                                <th mat-header-cell *matHeaderCellDef>Unit</th>
+                                <td mat-cell *matCellDef="let element; let i = index" [formGroup]="element">
+                                    <mat-form-field appearance="outline">
+                                        <input matInput type="text" formControlName="unit" autocomplete="off"
+                                            enterKeyFocus>
+                                    </mat-form-field>
+                                </td>
+                            </ng-container>
+
+                            <!-- Quantity Column -->
+                            <ng-container matColumnDef="quantity">
+                                <th mat-header-cell *matHeaderCellDef>Quantity</th>
+                                <td mat-cell *matCellDef="let element; let i = index" [formGroup]="element">
+                                    <mat-form-field appearance="outline">
+                                        <input matInput type="number" formControlName="quantity" autocomplete="off"
+                                            enterKeyFocus (change)="onChangeRateQuantity(i)">
+                                    </mat-form-field>
+                                </td>
+                            </ng-container>
+
+                            <!-- Unit Price Column -->
+                            <ng-container matColumnDef="unitPrice">
+                                <th mat-header-cell *matHeaderCellDef>Unit Price</th>
+                                <td mat-cell *matCellDef="let element; let i = index" [formGroup]="element">
+                                    <mat-form-field appearance="outline">
+                                        <input matInput type="number" formControlName="unitPrice" autocomplete="off"
+                                            enterKeyFocus (change)="onChangeRateQuantity(i)">
+                                    </mat-form-field>
+                                </td>
+                            </ng-container>
+
+                            <!-- total Price Column -->
+                            <ng-container matColumnDef="amount">
+                                <th mat-header-cell *matHeaderCellDef>Unit Price</th>
+                                <td mat-cell *matCellDef="let element; let i = index" [formGroup]="element">
+                                    <mat-form-field appearance="outline">
+                                        <input matInput type="number" formControlName="amount" autocomplete="off"
+                                            enterKeyFocus readonly>
+                                    </mat-form-field>
+                                </td>
+                            </ng-container>
+
+                            <!-- Action Column -->
+                            <ng-container matColumnDef="sales-detail-action">
+                                <th mat-header-cell *matHeaderCellDef class="w-8rem"></th>
+                                <td mat-cell *matCellDef="let element; let i = index" class="align-items-center">
+                                    <button mat-icon-button (click)="removeSalesDetail(i)" matTooltip="Remove" color="warn">
+                                        <mat-icon>close</mat-icon>
+                                    </button>
+
+                                </td>
+                            </ng-container>
+
+
+                            <!-- Header and Row Definitions -->
+                            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true;"></tr>
+                            <tr mat-row
+                                *matRowDef="let row; columns: salesDetailDataSource?.data?.length ? displayedColumns : ['empty-row'];">
+                            </tr>
+
+                            <!-- Empty Row Definition -->
+                            <ng-container matColumnDef="empty-row">
+                                <mat-cell *matCellDef="let element" class="grid-no-record"></mat-cell>
+                            </ng-container>
+
+                        </table>
+                    </ng-container> 
+                </div>
+                <div>
+                    <button mat-mini-fab class="action-button" matTooltip="{{ 'Add Items'}}"
+                        (click)="addSalesDetailControl()" color="primary">
+                        <mat-icon>add</mat-icon>
+                    </button>
+                </div>
+            </div>
+            <div class="summary-section mt-4">
+                <div class="d-flex">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Total Amount</mat-label>
+                        <input matInput type="number" formControlName="netAmount" readonly>
+                    </mat-form-field>
+                </div>
+                
+                <div class="d-flex">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Discount Percent</mat-label>
+                        <input matInput type="number" formControlName="discountPercent" (change)="onDiscountChange()">
+                    </mat-form-field>
+                </div>
+
+                <div class="d-flex">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Discount</mat-label>
+                        <input matInput type="number" formControlName="discount">
+                    </mat-form-field>
+                </div>
+                
+        
+                <div class="d-flex">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Net Payable</mat-label>
+                        <input matInput type="number" formControlName="totalAmount" readonly>
+                    </mat-form-field>
+                </div>
+            </div>
+        </form>
+    </ng-template>
+    <ng-template #abpFooter>
+        <button type="button" class="btn btn-secondary" #abpClose>{{'::Close' | abpLocalization}}</button>
+        <button class="btn btn-primary" (click)="saveSales()" [disabled]="form.invalid">
+            <i class="fa fa-check mr-1"></i>
+            {{'::Save' | abpLocalization}}
+        </button>
+    </ng-template>
+</abp-modal>
